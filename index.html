@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>א.י סחר - סלולר וטכנולוגיה</title>
+  <meta name="description" content="טלפונים, טאבלטים, שעונים ואביזרי טכנולוגיה בחנות א.י סלולר וטכנולוגיה המקום שלכם לטכנולוגיה.">
+  <meta property="og:title" content="א.י סחר - סלולר וטכנולוגיה">
+  <meta property="og:description" content="טלפונים, טאבלטים ואביזרי טכנולוגיה.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://idyllic-longma-9f7da0.netlify.app/images/samsung.jpg">
+  <meta property="og:locale" content="he_IL">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="">
+  <meta name="twitter:title" content="א.י סחר - סלולר וטכנולוגיה">
+  <meta name="twitter:description" content="טלפונים, טאבלטים ואביזרי טכנולוגיה.">
+  <meta name="twitter:image" content="https://idyllic-longma-9f7da0.netlify.app/images/samsung.jpg">
+  <meta name="theme-color" content="#0b3d91">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=variants-1">
+</head>
+<body>
+  <a href="#main-content" class="skip-link" id="skipLink">דלג לתוכן הראשי</a>
+  <noscript><div class="noscript-msg">האתר דורש הפעלת JavaScript כדי להציג את הקטלוג ולבצע הזמנה.</div></noscript>
+
+  <header class="navbar">
+    <a href="#/" class="logo" aria-label="Y.I Trade &amp; Marketing – לדף הבית"><b>Y.I</b><small>TRADE &amp; MARKETING</small></a>
+    <div class="search-wrap" role="search"><label class="sr-only" for="productSearch">חיפוש מוצרים</label><input id="productSearch" type="search" placeholder="חיפוש מוצרים…" aria-label="חיפוש מוצרים" autocomplete="off" aria-controls="searchResults" name="productSearch"><div id="searchResults" class="search-results" aria-live="polite"></div></div>
+    <nav class="nav-links" id="navLinks" aria-label="ניווט ראשי">
+      <a href="#/" class="active">בית</a>
+      <a href="#/category/samsung">Samsung</a>
+      <a href="#/category/apple">Apple</a>
+      <a href="#/category/xiaomi">Xiaomi</a>
+      <a href="#/category/tablets">טאבלטים</a>
+      <a href="#/category/kosher">כשרים</a>
+      <a href="#/category/extras">אביזרים</a>
+      <a href="#/order-status">מעקב הזמנה</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="cart-btn" id="cartBtn" type="button" aria-label="פתח עגלה" aria-controls="cartDrawer" aria-expanded="false">
+        <span aria-hidden="true">🛒</span> <span class="cart-count" id="cartCount" aria-label="מספר פריטים בעגלה">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="footer">
+    <div id="footerContact" class="footer-contact"></div>
+    <nav class="footer-links" aria-label="מידע משפטי ונגישות">
+      <a href="#/privacy">מדיניות פרטיות</a>
+      <a href="#/terms">תנאי שימוש</a>
+      <a href="#/returns">ביטול והחזרות</a>
+      <a href="#/cookies">מדיניות עוגיות</a>
+      <a href="#/accessibility">הצהרת נגישות</a>
+      <button type="button" id="cookieSettingsBtn" class="link-btn">הגדרות עוגיות</button>
+    </nav>
+    <p>© 2026 Y.I Trade &amp; Marketing · כל הזכויות שמורות</p>
+  </footer>
+
+  <!-- עגלה כמודל צדדי -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="cartDialogTitle" inert>
+    <div class="drawer-head">
+      <h3 id="cartDialogTitle">העגלה שלי</h3>
+      <button class="close" id="closeCart" aria-label="סגור">✕</button>
+    </div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-foot">
+      <div class="total-row"><span>סה״כ</span><strong id="cartTotal">₪0</strong></div>
+      <button class="btn-purple wide" id="checkoutBtn" type="button">מעבר להזמנה</button>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- פאנל ניהול חכם -->
+  <div id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminDialogTitle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; direction:rtl;">
+    <div style="background:#1e293b; color:#fff; padding:24px; border-radius:16px; width:94%; max-width:760px; max-height:90vh; overflow-y:auto; box-shadow:0 15px 35px rgba(0,0,0,0.6);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h3 id="adminDialogTitle" style="margin:0; font-size:22px;">⚙️ ניהול מוצרים חכם</h3>
+        <button id="adminModalClose" type="button" aria-label="סגירה" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
+      </div>
+      
+      <div id="adminLoginBox" style="display:none;padding:18px;background:#0f172a;border-radius:12px;margin-bottom:14px;color:#fff">
+        <h4 style="margin:0 0 12px;color:#38bdf8">כניסת מנהל</h4>
+        <form id="adminLoginForm" style="display:flex;flex-direction:column;gap:10px">
+          <label class="sr-only" for="adminLoginEmail">כתובת אימייל</label><input id="adminLoginEmail" type="email" autocomplete="username" placeholder="כתובת אימייל" aria-label="כתובת אימייל" required style="padding:11px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff" name="adminLoginEmail">
+          <label class="sr-only" for="adminLoginPassword">סיסמת מנהל</label><input id="adminLoginPassword" type="password" autocomplete="current-password" placeholder="סיסמת מנהל" aria-label="סיסמת מנהל" required style="padding:11px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff" name="adminLoginPassword">
+          <button type="submit" style="background:#1d4ed8;color:#fff;padding:11px;border-radius:8px;font-weight:bold">כניסה לניהול</button>
+          <div id="adminLoginError" role="alert" style="color:#fca5a5"></div>
+        </form>
+      </div>
+      <div id="adminManagementArea">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button id="adminLogoutBtn" type="button" style="background:#334155;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer">התנתקות</button></div>
+      <form id="adminAddProductForm" style="display:flex; flex-direction:column; gap:12px; background:#0f172a; padding:16px; border-radius:12px;">
+        <h4 style="margin:0; color:#38bdf8;">הוספה / עריכת מוצר</h4>
+        <input type="hidden" id="adminPId" name="adminPId">
+        <div style="display:flex; gap:10px;">
+          <label class="sr-only" for="adminPName">שם המוצר</label><input type="text" id="adminPName" placeholder="שם המוצר" aria-label="שם המוצר" maxlength="150" required style="flex:2; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPName">
+          <label class="sr-only" for="adminPPrice">מחיר בשקלים (כשאין וריאנטים)</label><input type="number" id="adminPPrice" placeholder="מחיר (₪)" title="משמש רק כשאין וריאנטים. כשיש וריאנטים המחיר נקבע מהם." aria-label="מחיר בשקלים (כשאין וריאנטים)" min="1" step="1" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPPrice">
+          <label class="sr-only" for="adminPYear">שנת הדגם</label><input type="number" id="adminPYear" placeholder="שנה" aria-label="שנת הדגם" min="2000" max="2035" style="width:90px; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPYear">
+        </div>
+        <div style="display:flex; gap:10px;">
+          <label class="sr-only" for="adminPCat">קטגוריה</label><select id="adminPCat" aria-label="קטגוריה" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPCat">
+            <option value="samsung">Samsung</option>
+            <option value="apple">Apple</option>
+            <option value="xiaomi">Xiaomi</option>
+            <option value="poco">Poco</option>
+            <option value="kosher">כשרים</option>
+            <option value="tablets">טאבלטים</option>
+            <option value="earbuds">אוזניות</option>
+            <option value="watches">שעונים</option>
+            <option value="chargers">מטענים</option>
+          </select>
+          <label class="sr-only" for="adminPSupply">סוג יבוא או מצב המוצר</label><select id="adminPSupply" aria-label="סוג יבוא או מצב המוצר" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPSupply">
+            <option value="">סוג: לפי תיאור קצר</option>
+            <option value="יבואן רשמי">יבואן רשמי</option>
+            <option value="יבואן מקביל">יבואן מקביל</option>
+            <option value="כשר">כשר</option>
+            <option value="מחודש">מחודש</option>
+            <option value="מכשיר שהופעל">מכשיר שהופעל</option>
+          </select>
+          <label class="sr-only" for="adminPMeta">תיאור קצר</label><input type="text" id="adminPMeta" placeholder="תיאור קצר (לדוגמה: יבואן מקביל · e-SIM)" aria-label="תיאור קצר" maxlength="200" style="flex:2; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPMeta">
+        </div>
+        <fieldset class="adm-variants" id="adminVariantsBox">
+          <legend>וריאנטים: צבע · זיכרון · RAM · מחיר · מק״ט</legend>
+          <p class="adm-hint">כל שורה היא שילוב אחד שהלקוח יכול לבחור, עם מחיר ומק״ט משלו. הלקוח רואה צבעים כעיגולים וזיכרון/RAM ככפתורים, והמחיר והמק״ט מתחלפים לפי הבחירה. צבע: אפשר להקליד שם (לבן, שחור, צהוב…) ולבחור כל גוון בבורר הצבעים. שורה בלי צבע = מוצר בלי בחירת צבע. הכפתור ⧉ משכפל שורה, וזה הדרך המהירה להוסיף צבע נוסף.</p>
+          <div id="adminVariantRows"></div>
+          <div class="adm-cibox"><h5>תמונה לכל צבע (לא חובה)</h5><p class="adm-hint">בחירת צבע בדף המוצר תחליף את התמונה לתמונה שהעלית לצבע הזה. בלי תמונה לצבע תוצג התמונה הכללית של המוצר.</p><div id="adminColorImages"></div></div>
+          <div class="adm-vactions"><button type="button" id="adminAddVariantBtn" class="adm-addv">+ הוספת וריאנט</button></div>
+          <div id="adminVariantWarn" class="adm-vwarn" role="status" aria-live="polite"></div>
+          <datalist id="adminColorNames"><option value="לבן"><option value="שחור"><option value="אפור"><option value="כסוף"><option value="טיטניום"><option value="זהב"><option value="צהוב"><option value="כתום"><option value="אדום"><option value="ורוד"><option value="סגול"><option value="כחול"><option value="תכלת"><option value="ירוק"><option value="חום"></datalist>
+          <datalist id="adminStorageList"><option value="32GB"><option value="64GB"><option value="128GB"><option value="256GB"><option value="512GB"><option value="1TB"><option value="2TB"></datalist>
+          <datalist id="adminRamList"><option value="2GB"><option value="3GB"><option value="4GB"><option value="6GB"><option value="8GB"><option value="12GB"><option value="16GB"></datalist>
+        </fieldset>
+        <label for="adminPDesc" style="color:#cbd5e1;font-size:14px;">תיאור המוצר</label>
+        <textarea id="adminPDesc" rows="3" maxlength="1000" placeholder="מידע נוסף שיופיע בעמוד המוצר" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;resize:vertical;" name="adminPDesc"></textarea>
+        <label for="adminPSpecs" style="color:#cbd5e1;font-size:14px;">מפרט מלא (שורה לכל פרט, למשל: מסך: 6.7 אינץ׳)</label>
+        <textarea id="adminPSpecs" rows="5" placeholder="מסך: ...&#10;זיכרון: ...&#10;מצלמה: ..." style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;resize:vertical;" name="adminPSpecs"></textarea>
+        <label for="adminPImages" style="color:#cbd5e1;font-size:14px;">תמונות המוצר (אפשר לבחור כמה תמונות)</label>
+        <input id="adminPImages" type="file" accept="image/*" multiple style="color:#cbd5e1;" name="adminPImages">
+        <div id="adminImagePreview" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" style="background:#7c3aed; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; flex:1;">שמור מוצר</button>
+          <button id="adminResetBtn" type="button" style="background:#475569; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">איפוס</button>
+        </div>
+      </form>
+
+      <section id="adminCategoryPanel" style="margin-top:14px;background:#0f172a;padding:16px;border-radius:12px;color:#fff">
+        <h4 style="margin:0 0 12px;color:#38bdf8">הוספת קטגוריה</h4>
+        <form id="adminCategoryForm" style="display:flex;flex-direction:column;gap:10px">
+          <input id="adminCategoryId" type="hidden" name="adminCategoryId">
+          <label class="sr-only" for="adminCategoryName">שם הקטגוריה</label><input id="adminCategoryName" type="text" maxlength="50" placeholder="שם הקטגוריה" aria-label="שם הקטגוריה" required style="padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff" name="adminCategoryName">
+          <label class="sr-only" for="adminCategoryTitle">כותרת בעמוד הקטגוריה</label><input id="adminCategoryTitle" type="text" maxlength="80" placeholder="כותרת בעמוד הקטגוריה" aria-label="כותרת בעמוד הקטגוריה" required style="padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff" name="adminCategoryTitle">
+          <label class="sr-only" for="adminCategoryDesc">תיאור הקטגוריה</label><textarea id="adminCategoryDesc" maxlength="180" rows="2" placeholder="תיאור הקטגוריה (לא חובה)" aria-label="תיאור הקטגוריה" style="padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff" name="adminCategoryDesc"></textarea>
+          <label>תמונת קטגוריה בלבד <input id="adminCategoryImage" type="file" accept="image/*" style="color:#cbd5e1" name="adminCategoryImage"></label>
+          <label>צבע הקטגוריה <input id="adminCategoryColor" type="color" value="#1e6bff" name="adminCategoryColor"></label>
+          <button type="submit" style="background:#7c3aed;color:#fff;padding:11px;border-radius:8px;font-weight:bold">הוסף קטגוריה</button>
+        </form>
+        <div style="margin-top:12px;color:#cbd5e1;font-size:13px">בחירת צבעי האתר</div>
+        <label class="sr-only" for="adminThemeSelect">צבעי האתר</label><select id="adminThemeSelect" aria-label="צבעי האתר" style="width:100%;margin-top:6px;padding:10px;border-radius:8px;background:#1e293b;color:#fff" name="adminThemeSelect">
+          <option>כחול</option><option>ירוק</option><option>סגול</option><option>אדום</option><option>כתום</option><option>שחור</option><option>טורקיז</option>
+        </select>
+        <div id="adminCategoriesList" style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>
+      </section>
+
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button id="adminBackupDownloadBtn" type="button" style="flex:1;background:#075985;color:#fff;padding:11px;border-radius:8px;font-weight:bold;cursor:pointer">⬇️ הורדת גיבוי</button>
+        <button id="adminBackupRestoreBtn" type="button" style="flex:1;background:#1d4ed8;color:#fff;padding:11px;border-radius:8px;font-weight:bold;cursor:pointer">↩️ שחזור מגיבוי</button>
+        <label class="sr-only" for="catalogBackupFile">קובץ גיבוי לשחזור</label><input id="catalogBackupFile" type="file" accept="application/json,.json" style="display:none" name="catalogBackupFile">
+      </div>
+      <hr style="border:0; border-top:1px solid #334155; margin:20px 0;">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="margin:0;">ניהול קטלוג קיים:</h4>
+        <label class="sr-only" for="adminSearch">חיפוש מוצר בקטלוג הניהול</label><input type="text" id="adminSearch" placeholder="חיפוש מוצר..." aria-label="חיפוש מוצר בקטלוג הניהול" style="padding:6px 12px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#fff; font-size:13px;" name="adminSearch">
+      </div>
+      <div id="adminProductsList" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="cloud-config.js"></script>
+  <script src="shop-info.js"></script>
+  <script src="order-config.js"></script>
+  <script src="legal.js?v=2"></script>
+  <script src="consent.js?v=1"></script>
+  <script src="catalog-data.js?v=variants-1"></script>
+  <script src="script.js?v=fixes-2"></script>
+</body>
+</html>
