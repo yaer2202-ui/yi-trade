@@ -680,3 +680,16 @@ button.vopt-chip:hover{background:#e0e8f6}
 .adm-th-mv{display:block;width:100%;margin-top:4px;padding:3px 0;border-radius:6px;background:#334155;color:#fff;font-size:12px}
 .adm-bn-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .adm-bn-reset{background:#475569;color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer}
+
+/* תיקון גלישת עמוד ההזמנה במסכים צרים */
+@media (max-width: 820px) {
+  main, #app, .checkout, .checkout > *, .checkout .panel, .checkout .order-form, .checkout .form-row, .checkout .field {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .checkout {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
