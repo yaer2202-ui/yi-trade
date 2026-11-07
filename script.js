@@ -1889,7 +1889,7 @@ function route() {
   document.getElementById('searchResults')?.classList.remove('open');
   if (page === 'admin' || page === 'admin-login') toggleAdminPanel();
   requestAnimationFrame(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try { window.scrollTo(0, 0); } catch { /* ignore */ }
     if (page === 'category' && arg2) document.getElementById('grp-' + arg2)?.scrollIntoView({ behavior: 'auto', block: 'start' });
     // מעבר בין עמודים: מעבירים פוקוס לתוכן (נגישות קוראי מסך ומקלדת)
     const key = (page || '') + '/' + (arg || '');
