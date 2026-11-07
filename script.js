@@ -395,7 +395,7 @@ async function saveCloudCatalog(snapshot){
   return true;
 }
 
-let catalogReady = !window.shopSupabase;
+let catalogReady = !window.shopSupabase && !window.shopSupabaseLoading;
 function rerenderCurrent() {
   const [page, arg, arg2] = routeParts();
   const app = document.getElementById('app');
@@ -424,6 +424,8 @@ async function fetchCloudCatalog(){
   PRODUCTS=buildProductList();cart=cart.filter(cartItemOk);saveCart();renderCart();
 }
 async function loadCloudCatalog(){
+  // ספריית Supabase עדיין נטענת ברקע: מחכים לאירוע shop-supabase-ready (או לטיימר הגיבוי שבסוף הקובץ)
+  if (window.shopSupabaseLoading) return;
   try { await fetchCloudCatalog(); }
   catch (error) { console.warn('Cloud catalog load failed', error && error.message); }
   finally { catalogReady = true; rerenderCurrent(); }
@@ -1942,8 +1944,17 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('hashchange', route);
 renderCart();
-applyTheme(localStorage.getItem(THEME_KEY)||'כחול');
+let savedTheme = null;
+try { savedTheme = localStorage.getItem(THEME_KEY); } catch { /* אחסון חסום בדפדפן הזה */ }
+applyTheme(savedTheme || 'כחול');
 renderShopInfo();
-route();
+try { route(); }
+catch (error) {
+  console.error('Route failed', error);
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.innerHTML = '<div class="empty">אירעה שגיאה בטעינת העמוד. <a class="inline-link" href="./">לרענון</a></div>';
+}
+window.addEventListener('shop-supabase-ready', () => { loadCloudCatalog(); });
 loadCloudCatalog();
-setTimeout(() => { if (!catalogReady) { catalogReady = true; rerenderCurrent(); } }, 3500);
+// טיימר גיבוי: אם הקטלוג מהענן לא הגיע תוך 2.5 שניות, מציגים את הקטלוג המקומי (והענן יעדכן כשיגיע)
+setTimeout(() => { if (!catalogReady) { catalogReady = true; rerenderCurrent(); } }, 2500);
