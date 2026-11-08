@@ -110,6 +110,8 @@ function sanitizeProduct(p) {
   if ('cat' in p && !CATEGORIES.some(c => c.id === p.cat)) return null;
   out.meta = typeof p.meta === 'string' ? p.meta : '';
   out.desc = typeof p.desc === 'string' ? p.desc : '';
+  out.inStock = p.inStock !== false;
+  out.freeShipping = p.freeShipping === true;
   out.image = typeof p.image === 'string' && SAFE_IMAGE_RE.test(p.image) ? p.image : '';
   out.year = Number.isFinite(Number(p.year)) && Number(p.year) > 0 ? Number(p.year) : null;
   out.colors = Array.isArray(p.colors) ? p.colors.filter(c => typeof c === 'string' && Object.prototype.hasOwnProperty.call(C, c)) : [];
@@ -126,7 +128,12 @@ function sanitizeProduct(p) {
   }
   if ('images' in p) {
     out.images = isPlainObject(p.images)
-      ? Object.fromEntries(Object.entries(p.images).filter(([, v]) => typeof v === 'string' && SAFE_IMAGE_RE.test(v)))
+      ? Object.fromEntries(Object.entries(p.images).map(([key, value]) => {
+        const images = Array.isArray(value)
+          ? value.filter(src => typeof src === 'string' && SAFE_IMAGE_RE.test(src)).slice(0, 3)
+          : (typeof value === 'string' && SAFE_IMAGE_RE.test(value) ? [value] : []);
+        return [key, images];
+      }).filter(([, images]) => images.length))
       : undefined;
   }
   return out;
@@ -335,7 +342,11 @@ async function cloudifyImages(product){
   const galleryImages=await Promise.all(product.galleryImages.map((src,i)=>src.startsWith('data:image/')?uploadProductImage(src,product.id,i):src));
   let images=product.images;
   if(isPlainObject(images)){
-    const entries=await Promise.all(Object.entries(images).map(async([k,src],i)=>[k,src.startsWith('data:image/')?await uploadProductImage(src,product.id,'c'+i):src]));
+    const entries=await Promise.all(Object.entries(images).map(async([k,value],i)=>{
+      const sources=Array.isArray(value)?value:[value];
+      const uploaded=await Promise.all(sources.map((src,j)=>src.startsWith('data:image/')?uploadProductImage(src,product.id,'c'+i+'_'+j):src));
+      return [k,Array.isArray(value)?uploaded:uploaded[0]];
+    }));
     images=Object.fromEntries(entries);
   }
   return {...product,galleryImages,images};
@@ -485,10 +496,11 @@ function renderAdminColorImages() {
   rows.forEach(r => { if (r.color && !colors.some(c => c.name === r.color)) colors.push({ name: r.color, hex: r.hex }); });
   Object.keys(adminColorImages).forEach(k => { if (!colors.some(c => c.name === k)) delete adminColorImages[k]; });
   box.innerHTML = colors.length ? colors.map(c => {
-    const src = adminColorImages[c.name];
+    const sources = Array.isArray(adminColorImages[c.name]) ? adminColorImages[c.name] : (adminColorImages[c.name] ? [adminColorImages[c.name]] : []);
+    const thumbs = sources.map((src, i) => `<span class="adm-ci-thumb"><img src="${escapeHTML(src)}" alt="תמונה ${i + 1} לצבע ${escapeHTML(c.name)}"><button type="button" class="adm-ci-remove" data-color-image-index="${i}" aria-label="הסרת תמונה ${i + 1} לצבע ${escapeHTML(c.name)}">×</button></span>`).join('');
     return `<div class="adm-ci" data-color="${escapeHTML(c.name)}"><span class="adm-ci-dot" style="background:${/^#[0-9a-f]{6}$/i.test(c.hex || '') ? c.hex : UNKNOWN_HEX}"></span><b>${escapeHTML(c.name)}</b>
-      ${src ? `<img src="${escapeHTML(src)}" alt="תמונת הצבע ${escapeHTML(c.name)}"><button type="button" class="adm-ci-rm" aria-label="הסרת תמונת הצבע ${escapeHTML(c.name)}">הסרה</button>` : '<span class="adm-ci-none">אין תמונה (תוצג התמונה הכללית)</span>'}
-      <label class="adm-ci-up">${src ? 'החלפה' : 'העלאת תמונה'}<input type="file" name="colorImage" accept="image/*" class="adm-ci-file" aria-label="תמונה לצבע ${escapeHTML(c.name)}"></label></div>`;
+      ${thumbs || '<span class="adm-ci-none">אין תמונה (תוצג התמונה הכללית)</span>'}
+      <label class="adm-ci-up"${sources.length >= 3 ? ' aria-disabled="true"' : ''}>${sources.length ? 'הוספת תמונות' : 'העלאת תמונות'}<input type="file" name="colorImage" accept="image/*" multiple class="adm-ci-file" aria-label="עד 3 תמונות לצבע ${escapeHTML(c.name)}"${sources.length >= 3 ? ' disabled' : ''}></label><small class="adm-ci-count">${sources.length} / 3</small></div>`;
   }).join('') : '<span class="adm-ci-none">הוסיפי צבע בשורת וריאנט כדי להתאים לו תמונה.</span>';
 }
 const newVariantId = () => 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
@@ -609,15 +621,23 @@ function checkAdminSkuDupes() {
     box.lastElementChild?.querySelector('.vr-color')?.focus();
   });
   document.getElementById('adminColorImages')?.addEventListener('change', async e => {
-    const input = e.target.closest('.adm-ci-file'); if (!input || !input.files[0]) return;
+    const input = e.target.closest('.adm-ci-file'); if (!input || !input.files.length) return;
     const color = input.closest('.adm-ci').dataset.color;
-    try { adminColorImages[color] = await compressProductImage(input.files[0]); }
+    try {
+      const existing = Array.isArray(adminColorImages[color]) ? adminColorImages[color] : (adminColorImages[color] ? [adminColorImages[color]] : []);
+      const room = Math.max(0, 3 - existing.length);
+      const added = await Promise.all([...input.files].slice(0, room).map(file => compressProductImage(file)));
+      adminColorImages[color] = [...existing, ...added].slice(0, 3);
+    }
     catch (err) { toast(err.message || 'לא הצלחתי לקרוא את התמונה'); }
     renderAdminColorImages();
   });
   document.getElementById('adminColorImages')?.addEventListener('click', e => {
-    if (!e.target.closest('.adm-ci-rm')) return;
-    delete adminColorImages[e.target.closest('.adm-ci').dataset.color];
+    const remove = e.target.closest('.adm-ci-remove'); if (!remove) return;
+    const row = remove.closest('.adm-ci'), color = row.dataset.color;
+    const sources = Array.isArray(adminColorImages[color]) ? [...adminColorImages[color]] : (adminColorImages[color] ? [adminColorImages[color]] : []);
+    sources.splice(Number(remove.dataset.colorImageIndex), 1);
+    if (sources.length) adminColorImages[color] = sources; else delete adminColorImages[color];
     renderAdminColorImages();
   });
   renderAdminVariants([blankAdminVariant()], '');
@@ -631,6 +651,8 @@ function resetAdminForm() {
   document.getElementById('adminPYear').value = '';
   document.getElementById('adminPDesc').value = '';
   document.getElementById('adminPSpecs').value = '';
+  document.getElementById('adminPInStock').checked = true;
+  document.getElementById('adminPFreeShipping').checked = false;
   document.getElementById('adminPImages').value = '';
   adminExistingImages = [];
   adminNewImagePreviews.forEach(src => URL.revokeObjectURL(src));
@@ -658,6 +680,8 @@ function editProductInAdmin(id) {
   document.getElementById('adminPYear').value = p.year || '';
   document.getElementById('adminPCat').value = p.cat;
   document.getElementById('adminPMeta').value = p.meta || '';
+  document.getElementById('adminPInStock').checked = p.inStock !== false;
+  document.getElementById('adminPFreeShipping').checked = p.freeShipping === true;
   document.getElementById('adminPSupply').value = ['יבואן רשמי','יבואן מקביל','כשר','מחודש','מכשיר שהופעל'].includes(p.supply) ? p.supply : '';
   adminColorImages = { ...(p.images || {}) };
   renderAdminVariants(p.variants.map(v => ({ ...v })), p.id);
@@ -685,7 +709,21 @@ function editProductInAdmin(id) {
 
 function saveProductFromAdmin(event) {
   event.preventDefault();
-  saveProductFromAdminAsync();
+  const button = document.querySelector('#adminAddProductForm [type="submit"]');
+  if (button?.disabled) return;
+  const previousLabel = button?.textContent || 'שמור מוצר';
+  if (button) { button.disabled = true; button.textContent = 'שומר…'; }
+  saveProductFromAdminAsync()
+    .catch(error => {
+      console.error('Product save failed', error);
+      toast('שמירת המוצר נכשלה: ' + (error?.message || 'בדקי חיבור ונסי שוב'));
+    })
+    .finally(() => {
+      if (button) {
+        button.disabled = false;
+        if (button.textContent === 'שומר…') button.textContent = previousLabel;
+      }
+    });
 }
 
 async function saveProductFromAdminAsync() {
@@ -728,8 +766,9 @@ async function saveProductFromAdminAsync() {
   const colorNames = new Set(variants.map(v => v.color).filter(Boolean));
   let colorImages = {};
   try {
-    for (const [i, [color, src]] of Object.entries(adminColorImages).filter(([c]) => colorNames.has(c)).entries()) {
-      colorImages[color] = src.startsWith('data:image/') ? await uploadProductImage(src, itemId, 'c' + i) : src;
+    for (const [i, [color, values]] of Object.entries(adminColorImages).filter(([c]) => colorNames.has(c)).entries()) {
+      const sources = (Array.isArray(values) ? values : [values]).slice(0, 3);
+      colorImages[color] = await Promise.all(sources.map((src, j) => src.startsWith('data:image/') ? uploadProductImage(src, itemId, 'c' + i + '_' + j) : src));
     }
   } catch (error) { return toast(error.message || 'לא הצלחתי להעלות את תמונות הצבעים. בדקי שהתחברת לניהול'); }
   const item = {
@@ -737,6 +776,8 @@ async function saveProductFromAdminAsync() {
     id: itemId,
     cat, name, price, meta, year, supply,
     desc,
+    inStock: document.getElementById('adminPInStock').checked,
+    freeShipping: document.getElementById('adminPFreeShipping').checked,
     image: '',
     variants, images: Object.keys(colorImages).length ? colorImages : undefined,
     colors: [], storage: [], storagePrices: undefined,
@@ -747,8 +788,13 @@ async function saveProductFromAdminAsync() {
   else if (id.startsWith('custom-')) userProducts = userProducts.map(p => p.id === id ? item : p);
   else productOverrides[id] = item;
   const cloudSaved = await persistCatalog();
+  if (!cloudSaved) {
+    return toast('הנתונים נשארו בטופס, אבל לא נשמרו בענן. בדקי חיבור והרשאות ניהול ונסי לשמור שוב.');
+  }
   if (cloudSaved && old) {
-    const removedImages = [...(old.galleryImages || []).filter(u => !galleryImages.includes(u)), ...(old.detailImages || []).filter(u => !detailImages.includes(u)), ...Object.values(old.images || {}).filter(u => !Object.values(colorImages).includes(u))];
+    const oldColorImages = Object.values(old.images || {}).flatMap(value => Array.isArray(value) ? value : [value]);
+    const newColorImages = Object.values(colorImages).flatMap(value => Array.isArray(value) ? value : [value]);
+    const removedImages = [...(old.galleryImages || []).filter(u => !galleryImages.includes(u)), ...(old.detailImages || []).filter(u => !detailImages.includes(u)), ...oldColorImages.filter(u => !newColorImages.includes(u))];
     if (removedImages.length) cloudSaveChain.then(ok => { if (ok) removeCloudImages(removedImages); });
   }
   resetAdminForm();
@@ -766,7 +812,7 @@ async function deleteProductFromAdmin(id) {
   }
   const cloudSaved = await persistCatalog();
   if (cloudSaved) {
-    const deletedImages = [...(p.galleryImages || []), ...(p.detailImages || []), ...Object.values(p.images || {})];
+    const deletedImages = [...(p.galleryImages || []), ...(p.detailImages || []), ...Object.values(p.images || {}).flatMap(value => Array.isArray(value) ? value : [value])];
     if (deletedImages.length) cloudSaveChain.then(ok => { if (ok) removeCloudImages(deletedImages); });
   }
   renderAdminList();
@@ -902,9 +948,22 @@ function productPlaceholder() {
 function productImage(p, colorKey) {
   const fb = productPlaceholder();
   // סדר עדיפויות: תמונה לפי צבע -> תמונה כללית -> images/<id>.jpg
-  const src = (p.images && colorKey && p.images[colorKey]) || (p.galleryImages && p.galleryImages[0]) || p.image;
+  const colorImages = p.images && colorKey ? p.images[colorKey] : null;
+  const src = (Array.isArray(colorImages) ? colorImages[0] : colorImages) || (p.galleryImages && p.galleryImages[0]) || p.image;
   if (src) { FALLBACKS[src] = fb; return src; }
   return fb;
+}
+function productImageList(p, colorKey) {
+  const colorImages = p.images && colorKey ? p.images[colorKey] : null;
+  const list = Array.isArray(colorImages) ? colorImages : (colorImages ? [colorImages] : []);
+  return list.length ? list : (p.galleryImages?.length ? p.galleryImages : (p.image ? [p.image] : []));
+}
+function renderProductGallery(host, p, variant) {
+  const box = host.querySelector('.pdp-gallery');
+  const images = productImageList(p, variant.color);
+  if (!box) return;
+  box.innerHTML = images.length > 1 ? images.map((src, i) => `<button type="button" class="pdp-thumb ${i===0?'sel':''}" data-image="${escapeHTML(src)}" aria-label="הצגת תמונה ${i + 1}"><img src="${escapeHTML(src)}" alt="" loading="lazy"></button>`).join('') : '';
+  box.hidden = images.length < 2;
 }
 /* תמונות בלוקי דף הבית – הדבק כאן קישורי תמונה (URL או נתיב מקומי) */
 const CATEGORY_IMAGES = {
@@ -1173,8 +1232,15 @@ function updatePdp(host, p, v) {
   const skuRow = host.querySelector('#pdpSkuRow');
   skuRow.hidden = !v.sku;
   host.querySelector('#pdpSku').textContent = v.sku || '';
-  const imgSrc = productImage(p, v.color);
+  const images = productImageList(p, v.color);
+  const imgSrc = images[0] || productImage(p, v.color);
   host.querySelector('#pdpImg').src = imgSrc;
+  renderProductGallery(host, p, v);
+  const stockState = stockDisplay(p, v);
+  const stock = host.querySelector('#pdpStock');
+  if (stock) { stock.textContent = stockState.label; stock.classList.toggle('is-in', stockState.className === 'is-in'); stock.classList.toggle('is-out', stockState.className === 'is-out'); stock.classList.toggle('is-unknown', stockState.className === 'is-unknown'); }
+  const stockBenefit = host.querySelector('[data-stock-benefit] b');
+  if (stockBenefit) stockBenefit.textContent = stockState.available === null ? stockState.label : (stockState.available ? 'זמין במלאי' : 'לא זמין כרגע');
   host.querySelectorAll('.pdp-thumb').forEach(t => t.classList.toggle('sel', t.dataset.image === imgSrc));
   try { history.replaceState(null, '', productHref(p, v)); } catch { /* ignore */ }
 }
@@ -1194,6 +1260,67 @@ document.addEventListener('click', e => {
 });
 
 const WARRANTY_LABEL = 'שנה אחריות';
+function getSheetStock(p, v) {
+  const stock = window.SHOP_STOCK_BY_SKU || {};
+  const keys = [v && v.sku, p && v ? `${p.id}__${v.id}` : '', p && p.id].filter(Boolean);
+  for (const key of keys) if (Object.prototype.hasOwnProperty.call(stock, key)) return stock[key];
+  return undefined;
+}
+function stockDisplay(p, v) {
+  const configured = !!window.SHOP_STOCK_CONFIG?.csvUrl;
+  const value = getSheetStock(p, v);
+  if (typeof value === 'boolean') return { available: value, label: value ? '✓ זמין במלאי' : 'אזל מהמלאי', className: value ? 'is-in' : 'is-out' };
+  if (!configured) return { available: p.inStock !== false, label: p.inStock !== false ? '✓ זמין במלאי' : 'אזל מהמלאי', className: p.inStock !== false ? 'is-in' : 'is-out' };
+  if (window.SHOP_STOCK_ERROR) return { available: null, label: 'לא ניתן לטעון מלאי', className: 'is-unknown' };
+  if (!window.SHOP_STOCK_BY_SKU) return { available: null, label: 'בודק זמינות…', className: 'is-unknown' };
+  return { available: null, label: 'אין נתון מלאי למק״ט הזה', className: 'is-unknown' };
+}
+function parseStockCSV(text) {
+  const rows = [];
+  let row = [], cell = '', quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"' && quoted && text[i + 1] === '"') { cell += '"'; i++; }
+    else if (ch === '"') quoted = !quoted;
+    else if (ch === ',' && !quoted) { row.push(cell); cell = ''; }
+    else if ((ch === '\n' || ch === '\r') && !quoted) {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += ch;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+async function loadShopStock() {
+  const cfg = window.SHOP_STOCK_CONFIG || {};
+  if (!cfg.csvUrl) return;
+  window.SHOP_STOCK_ERROR = '';
+  try {
+    const response = await fetch(cfg.csvUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Stock sheet request failed');
+    const rows = parseStockCSV(await response.text());
+    const headers = (rows.shift() || []).map(x => x.trim().replace(/^\uFEFF/, ''));
+    const skuIndex = headers.indexOf(cfg.skuColumn || 'SKU');
+    const qtyIndex = headers.indexOf(cfg.quantityColumn || 'כמות');
+    if (skuIndex < 0 || qtyIndex < 0) throw new Error('Stock sheet columns do not match configuration');
+    const stock = {};
+    rows.forEach(row => {
+      const sku = String(row[skuIndex] || '').trim();
+      const raw = String(row[qtyIndex] || '').trim().toLowerCase();
+      const normalized = raw.replace(/\s+/g, ' ');
+      const unavailable = ['false', 'no', '0', 'לא', 'לא זמין', 'אזל', 'אזל מהמלאי', 'אין'].includes(normalized);
+      const available = ['true', 'yes', '1', 'כן', 'זמין', 'במלאי', 'יש'].includes(normalized);
+      const qty = Number(normalized.replace(/[^\d.-]/g, ''));
+      if (sku) stock[sku] = available || (!unavailable && Number.isFinite(qty) && qty > 0);
+    });
+    window.SHOP_STOCK_BY_SKU = stock;
+    if (routeParts()[0] === 'product') route();
+  } catch (error) {
+    window.SHOP_STOCK_ERROR = error?.message || 'Stock feed unavailable';
+    console.warn('Google Sheets stock could not be loaded.', error);
+    if (routeParts()[0] === 'product') route();
+  }
+}
 const SUPPLY_ORDER = ['יבואן רשמי', 'יבואן מקביל', 'כשר', 'מחודש', 'מכשיר שהופעל', ''];
 function categoryProductGroups(items,id){
   if(id!=='extras'){
@@ -1302,13 +1429,13 @@ function viewProduct(id, vid) {
   const cat = CATEGORIES.find(c => c.id === p.cat);
   if (!cat) return viewNotFound();
   const v = findVariant(p, vid) || defaultVariant(p);
+  const stockState = stockDisplay(p, v);
   const specRows = Object.entries(p.specs || {}).filter(([k,val]) => !['דגם','פרטים','מחיר','הערה'].includes(k) && publicText(val)).map(([k,val]) => `<tr><td>${escapeHTML(k)}</td><td>${escapeHTML(publicText(val))}</td></tr>`).join('');
   return `<div class="crumbs"><a href="#/">בית</a> › <a href="#/category/${encodeURIComponent(cat.id)}">${escapeHTML(cat.name)}</a> › ${escapeHTML(p.name)}</div>
   <div class="pdp" data-pid="${escapeHTML(p.id)}" data-vid="${escapeHTML(v.id)}">
-    <div class="pdp-media"><div class="pdp-frame"><img id="pdpImg" src="${escapeHTML(productImage(p, v.color))}" alt="${escapeHTML(p.name)}"></div><p class="pdp-disclaimer">ט.ל.ח – התמונה להמחשה בלבד</p>${p.galleryImages?.length > 1 ? `<div class="pdp-gallery">${p.galleryImages.map((src,i)=>`<button type="button" class="pdp-thumb ${i===0?'sel':''}" data-image="${escapeHTML(src)}" aria-label="הצגת תמונה ${i+1}"><img src="${escapeHTML(src)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
+    <div class="pdp-media"><div class="pdp-frame"><img id="pdpImg" src="${escapeHTML(productImage(p, v.color))}" alt="${escapeHTML(p.name)}"></div><p class="pdp-disclaimer">ט.ל.ח – התמונה להמחשה בלבד</p><div class="pdp-gallery"${productImageList(p, v.color).length > 1 ? '' : ' hidden'}>${productImageList(p, v.color).map((src,i)=>`<button type="button" class="pdp-thumb ${i===0?'sel':''}" data-image="${escapeHTML(src)}" aria-label="הצגת תמונה ${i+1}"><img src="${escapeHTML(src)}" alt="" loading="lazy"></button>`).join('')}</div></div>
     <div class="pdp-info">
       <h1>${escapeHTML(p.name)} ${productSupplyType(p) ? `<span class="product-badge">${escapeHTML(productSupplyType(p))}</span>` : ''}</h1>
-      <p class="pdp-warranty">✓ ${WARRANTY_LABEL} מלאה</p>
       <div class="pdp-buy">
         <div class="pdp-price" id="pdpPrice" aria-live="polite">${fmt(v.price)}</div>
         <div class="pdp-actions">
@@ -1316,18 +1443,19 @@ function viewProduct(id, vid) {
           <button type="button" class="btn-order alt" id="addBtn">הוספה לעגלה</button>
         </div>
       </div>
-      ${publicText(p.desc) ? `<p class="desc">${escapeHTML(publicText(p.desc))}</p>` : ''}
+      <div class="pdp-stock-row"><span id="pdpStock" class="pdp-stock ${stockState.className}">${stockState.label}</span>${p.freeShipping ? '<span class="pdp-free-shipping">🚚 משלוח חינם</span>' : ''}</div>
       <div class="pdp-opts" id="pdpOpts">${optionsHTML(p, v)}</div>
+      ${publicText(p.desc) ? `<p class="desc">${escapeHTML(publicText(p.desc))}</p>` : ''}
       <p class="pdp-sku" id="pdpSkuRow"${v.sku ? '' : ' hidden'}>מק״ט: <b id="pdpSku" dir="ltr">${escapeHTML(v.sku || '')}</b></p>
-      <ul class="pdp-trust" aria-label="יתרונות הרכישה">
-        <li>🛡️ אחריות יבואן ל-12 חודשים</li>
-        <li>🚚 משלוח לכל הארץ</li>
-        <li>🔒 תשלום מאובטח/במזומן בעת קבלה</li>
-        <li>📞 שירות לקוחות זמין</li>
-      </ul>
     </div>
-    ${alsoBoughtHTML(p)}
+    <ul class="pdp-trust" aria-label="יתרונות הרכישה">
+      <li data-stock-benefit><span>✓</span><b>${stockState.available === null ? escapeHTML(stockState.label) : (stockState.available ? 'זמין במלאי' : 'לא זמין כרגע')}</b></li>
+      <li><span>🚚</span>${p.freeShipping?'משלוח חינם':'משלוחים לכל הארץ'}</li>
+      <li><span>🛡️</span>${WARRANTY_LABEL}</li>
+      <li><span>🔒</span>תשלום מאובטח</li>
+    </ul>
     ${(specRows || (p.detailImages || []).length) ? `<section class="pdp-full" aria-labelledby="fullSpecTitle"><h2 id="fullSpecTitle">מפרט מלא</h2>${specRows ? `<table class="fullspec-table">${specRows}</table>` : ''}${(p.detailImages || []).length ? `<div class="pdp-detail-imgs">${p.detailImages.map((src, i) => `<img src="${escapeHTML(src)}" alt="${escapeHTML(p.name)} – תמונת פירוט ${i + 1}" loading="lazy">`).join('')}</div>` : ''}</section>` : ''}
+    ${alsoBoughtHTML(p)}
   </div>`;
 }
 
@@ -1335,8 +1463,11 @@ function bindProduct(id) {
   const p = PRODUCTS.find(x => x.id === id); if (!p) return;
   const host = document.querySelector('.pdp');
   const current = () => findVariant(p, host && host.dataset.vid) || defaultVariant(p);
-  const thumbs = document.querySelectorAll('.pdp-thumb');
-  thumbs.forEach(button => button.onclick = () => { $('#pdpImg').src = button.dataset.image; thumbs.forEach(t => t.classList.toggle('sel', t === button)); });
+  host.addEventListener('click', event => {
+    const button = event.target.closest('.pdp-thumb'); if (!button) return;
+    $('#pdpImg').src = button.dataset.image;
+    host.querySelectorAll('.pdp-thumb').forEach(t => t.classList.toggle('sel', t === button));
+  });
   $('#addBtn').onclick = () => { addToCart(p.id, current().id); openCart(); };
   $('#buyNow').onclick = () => { addToCart(p.id, current().id); location.hash = '#/checkout'; };
 }
@@ -1859,9 +1990,11 @@ installAdminExtras();
 /* ---------- Router ---------- */
 function renderNav(active) {
   const cur = on => on ? ' aria-current="page"' : '';
-  $('#navLinks').innerHTML = `<a href="#/" class="${!active ? 'active' : ''}"${cur(!active)}>בית</a>` +
-    CATEGORIES.map(c => `<a href="#/category/${encodeURIComponent(c.id)}" class="${active === c.id ? 'active' : ''}"${cur(active === c.id)}>${escapeHTML(c.name)}</a>`).join('') +
-    `<a href="#/order-status" class="${active === 'order-status' ? 'active' : ''}"${cur(active === 'order-status')}>מעקב הזמנה</a>`;
+  const label = (full, compact) => `<span class="nav-label-full">${escapeHTML(full)}</span><span class="nav-label-compact">${escapeHTML(compact)}</span>`;
+  const shortNames = { samsung: 'סמסונג', apple: 'Apple', xiaomi: 'Xiaomi', tablets: 'טאבלט', kosher: 'כשרים', extras: 'אביזרים' };
+  $('#navLinks').innerHTML = `<a href="#/" aria-label="בית" class="${!active ? 'active' : ''}"${cur(!active)}>${label('בית', 'בית')}</a>` +
+    CATEGORIES.map(c => `<a href="#/category/${encodeURIComponent(c.id)}" aria-label="${escapeHTML(c.name)}" class="${active === c.id ? 'active' : ''}"${cur(active === c.id)}>${label(c.name, shortNames[c.id] || c.name)}</a>`).join('') +
+    `<a href="#/order-status" aria-label="מעקב הזמנה" class="${active === 'order-status' ? 'active' : ''}"${cur(active === 'order-status')}>${label('מעקב הזמנה', 'מעקב')}</a>`;
 }
 const LEGAL_PAGES = ['privacy', 'terms', 'returns', 'cookies', 'accessibility'];
 let lastRouteKey = '';
@@ -1943,6 +2076,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('catalogFilters')?.classList.contains('open')) setFilterDrawer(false);
 });
 window.addEventListener('hashchange', route);
+loadShopStock();
+if (Number(window.SHOP_STOCK_CONFIG?.refreshMs) > 0) setInterval(loadShopStock, Number(window.SHOP_STOCK_CONFIG.refreshMs));
 renderCart();
 let savedTheme = null;
 try { savedTheme = localStorage.getItem(THEME_KEY); } catch { /* אחסון חסום בדפדפן הזה */ }

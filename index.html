@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <noscript><link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="style.css?v=mobilefix-3">
+  <link rel="stylesheet" href="style.css?v=pdp-inventory-1">
 </head>
 <body>
   <a href="#main-content" class="skip-link" id="skipLink">דלג לתוכן הראשי</a>
@@ -126,11 +126,12 @@
           </select>
           <label class="sr-only" for="adminPMeta">תיאור קצר</label><input type="text" id="adminPMeta" placeholder="תיאור קצר (לדוגמה: יבואן מקביל · e-SIM)" aria-label="תיאור קצר" maxlength="200" style="flex:2; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPMeta">
         </div>
+        <fieldset class="adm-variants adm-product-flags"><legend>זמינות והטבות</legend><label><input id="adminPInStock" type="checkbox" checked> זמין במלאי (גיבוי כשאין גיליון מלאי מחובר)</label><label><input id="adminPFreeShipping" type="checkbox"> משלוח חינם</label></fieldset>
         <fieldset class="adm-variants" id="adminVariantsBox">
           <legend>וריאנטים: צבע · זיכרון · RAM · מחיר · מק״ט</legend>
           <p class="adm-hint">כל שורה היא שילוב אחד שהלקוח יכול לבחור, עם מחיר ומק״ט משלו. הלקוח רואה צבעים כעיגולים וזיכרון/RAM ככפתורים, והמחיר והמק״ט מתחלפים לפי הבחירה. צבע: אפשר להקליד שם (לבן, שחור, צהוב…) ולבחור כל גוון בבורר הצבעים. שורה בלי צבע = מוצר בלי בחירת צבע. הכפתור ⧉ משכפל שורה, וזה הדרך המהירה להוסיף צבע נוסף.</p>
           <div id="adminVariantRows"></div>
-          <div class="adm-cibox"><h5>תמונה לכל צבע (לא חובה)</h5><p class="adm-hint">בחירת צבע בדף המוצר תחליף את התמונה לתמונה שהעלית לצבע הזה. בלי תמונה לצבע תוצג התמונה הכללית של המוצר.</p><div id="adminColorImages"></div></div>
+          <div class="adm-cibox"><h5>עד 3 תמונות לכל צבע (לא חובה)</h5><p class="adm-hint">אפשר לבחור כמה קבצים יחד, עד 3 תמונות לכל צבע. בדף המוצר התמונות יופיעו בגלריה ויתחלפו לפי הצבע שנבחר.</p><div id="adminColorImages"></div></div>
           <div class="adm-vactions"><button type="button" id="adminAddVariantBtn" class="adm-addv">+ הוספת וריאנט</button></div>
           <div id="adminVariantWarn" class="adm-vwarn" role="status" aria-live="polite"></div>
           <datalist id="adminColorNames"><option value="לבן"><option value="שחור"><option value="אפור"><option value="כסוף"><option value="טיטניום"><option value="זהב"><option value="צהוב"><option value="כתום"><option value="אדום"><option value="ורוד"><option value="סגול"><option value="כחול"><option value="תכלת"><option value="ירוק"><option value="חום"></datalist>
@@ -187,9 +188,10 @@
   <script src="cloud-config.js?v=mobilefix-2"></script>
   <script src="shop-info.js"></script>
   <script src="order-config.js"></script>
+  <script src="stock-config.js?v=stock-feed-2"></script>
   <script src="legal.js?v=2"></script>
   <script src="consent.js?v=1"></script>
   <script src="catalog-data.js?v=variants-1"></script>
-  <script src="script.js?v=mobilefix-2"></script>
+  <script src="script.js?v=stock-feed-2"></script>
 </body>
 </html>
