@@ -1,0 +1,31 @@
+/* =========================================================
+   סדרות (תתי-קטגוריות) בדפי קטגוריה: כותרת סדרה, פרימיום מול רגילה, ופס יבואן בתוך הסדרה
+   ========================================================= */
+.series-group{margin:0 0 44px;scroll-margin-top:90px}
+.series-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding:14px 22px;border-radius:16px;color:#fff;
+  background:linear-gradient(100deg,#05070d 0%,#0b3d91 58%,#1e6bff 100%);border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 18px rgba(60,140,255,.3)}
+.series-head h2{margin:0;padding:0;border:0;font-size:clamp(21px,3vw,30px);font-weight:900;line-height:1.2;color:#fff}
+.series-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 13px;border-radius:999px;font-size:13px;font-weight:800;color:#2b1d00;
+  background:linear-gradient(135deg,#ffe38a,#e6b422);box-shadow:0 2px 10px rgba(255,200,60,.45)}
+.series-group.is-premium .series-head{background:linear-gradient(100deg,#05070d 0%,#2b2108 52%,#8a6a12 100%);border-color:rgba(255,213,74,.75);
+  box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 26px rgba(255,200,60,.35)}
+.series-group .product-group{margin-bottom:0}
+.series-group .supply-group+.supply-group{margin-top:26px}
+.series-group .supply-group>h3{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:18px;font-weight:800;color:#fff}
+.series-group .supply-group>h3::before{content:"";flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:#5aa2ff;box-shadow:0 0 10px #1e6bff}
+.series-group .supply-group>h3::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(to left,transparent,rgba(90,162,255,.7))}
+@media (max-width:560px){.series-head{padding:11px 14px;gap:10px;border-radius:14px}.series-group{margin-bottom:32px}}
+
+/* ניהול: תתי-קטגוריות וצבע כיתוב לבאנר */
+.adm-subs{margin-top:14px;color:#fff}
+.adm-subrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#1e293b;border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.adm-subrow .adm-sub-name{flex:1 1 160px;min-width:0;width:auto}
+.adm-sub-prem{display:inline-flex;align-items:center;gap:6px;color:#fde68a;font-size:13px;cursor:pointer}
+.adm-subrow button{min-width:36px;height:36px;padding:0 10px;border-radius:8px;background:#334155;color:#fff;cursor:pointer}
+.adm-subrow button:disabled{opacity:.4;cursor:default}
+.adm-subrow .adm-sub-del{background:#7f1d1d}
+.adm-sub-add{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.adm-sub-add .adm-fld{flex:1 1 200px;width:auto}
+.adm-bn-color{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.adm-bn-color input[type=color]{width:54px;height:40px;padding:2px;border-radius:8px;border:1px solid #334155;background:#1e293b;cursor:pointer}

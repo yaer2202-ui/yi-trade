@@ -3,40 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>א.י סחר - סלולר וטכנולוגיה</title>
-  <meta name="description" content="טלפונים, טאבלטים, שעונים ואביזרי טכנולוגיה בחנות א.י סלולר וטכנולוגיה המקום שלכם לטכנולוגיה.">
-  <meta property="og:title" content="א.י סחר - סלולר וטכנולוגיה">
-  <meta property="og:description" content="טלפונים, טאבלטים ואביזרי טכנולוגיה.">
+  <title>החנות שלך</title>
+  <meta name="description" content="טלפונים וטכנולוגיה – החנות שלך.">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="טלפונים וטכנולוגיה.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://idyllic-longma-9f7da0.netlify.app/images/samsung.jpg">
+  <meta property="og:image" content="https://yi-trade.netlify.app/images/samsung.jpg">
   <meta property="og:locale" content="he_IL">
   <meta name="twitter:card" content="summary_large_image">
-  <meta property="og:url" content="">
-  <meta name="twitter:title" content="א.י סחר - סלולר וטכנולוגיה">
-  <meta name="twitter:description" content="טלפונים, טאבלטים ואביזרי טכנולוגיה.">
-  <meta name="twitter:image" content="https://idyllic-longma-9f7da0.netlify.app/images/samsung.jpg">
+  <meta property="og:url" content="https://yi-trade.netlify.app/">
+  <meta name="twitter:title" content="החנות שלך">
+  <meta name="twitter:description" content="טלפונים וטכנולוגיה.">
+  <meta name="twitter:image" content="https://yi-trade.netlify.app/images/samsung.jpg">
   <meta name="theme-color" content="#0b3d91">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="style.css?v=pdp-inventory-1">
+  <link rel="stylesheet" href="css/01-base-nav.css?v=split-1">
+<link rel="stylesheet" href="css/02-home.css?v=split-1">
+<link rel="stylesheet" href="css/03-category-product.css?v=split-1">
+<link rel="stylesheet" href="css/04-cart-checkout.css?v=split-1">
+<link rel="stylesheet" href="css/05-fixes-orders.css?v=split-1">
+<link rel="stylesheet" href="css/06-a11y-legal-responsive.css?v=split-1">
+<link rel="stylesheet" href="css/07-product-cards-filter.css?v=split-1">
+<link rel="stylesheet" href="css/08-variants-admin.css?v=split-1">
+<link rel="stylesheet" href="css/09-banners-mobile.css?v=split-1">
+<link rel="stylesheet" href="css/10-series-admin-subs.css?v=split-1">
 </head>
 <body>
   <a href="#main-content" class="skip-link" id="skipLink">דלג לתוכן הראשי</a>
   <noscript><div class="noscript-msg">האתר דורש הפעלת JavaScript כדי להציג את הקטלוג ולבצע הזמנה.</div></noscript>
 
   <header class="navbar">
-    <a href="#/" class="logo" aria-label="Y.I Trade &amp; Marketing – לדף הבית"><b>Y.I</b><small>TRADE &amp; MARKETING</small></a>
-    <div class="search-wrap" role="search"><label class="sr-only" for="productSearch">חיפוש מוצרים</label><input id="productSearch" type="search" placeholder="חיפוש מוצרים…" aria-label="חיפוש מוצרים" autocomplete="off" aria-controls="searchResults" name="productSearch"><div id="searchResults" class="search-results" aria-live="polite"></div></div>
+    <a href="#/" class="logo" aria-label="החנות שלך – לדף הבית"><b>החנות שלך</b><small>סלולר וטכנולוגיה</small></a>
+    <div class="search-wrap" role="search"><label class="sr-only" for="productSearch">חיפוש מוצרים</label><input id="productSearch" type="search" placeholder="חיפוש מוצרים…" aria-label="חיפוש מוצרים" autocomplete="off" aria-controls="searchResults" aria-autocomplete="list" role="combobox" aria-expanded="false" name="productSearch"><div id="searchResults" class="search-results" role="listbox" aria-label="תוצאות חיפוש" aria-live="polite"></div></div>
     <nav class="nav-links" id="navLinks" aria-label="ניווט ראשי">
       <a href="#/" class="active">בית</a>
       <a href="#/category/samsung">Samsung</a>
       <a href="#/category/apple">Apple</a>
       <a href="#/category/xiaomi">Xiaomi</a>
-      <a href="#/category/tablets">טאבלטים</a>
-      <a href="#/category/kosher">כשרים</a>
-      <a href="#/category/extras">אביזרים</a>
       <a href="#/order-status">מעקב הזמנה</a>
     </nav>
     <div class="nav-actions">
@@ -49,16 +52,12 @@
   <main id="app" tabindex="-1"></main>
 
   <footer class="footer">
-    <div id="footerContact" class="footer-contact"></div>
-    <nav class="footer-links" aria-label="מידע משפטי ונגישות">
-      <a href="#/privacy">מדיניות פרטיות</a>
-      <a href="#/terms">תנאי שימוש</a>
-      <a href="#/returns">ביטול והחזרות</a>
-      <a href="#/cookies">מדיניות עוגיות</a>
-      <a href="#/accessibility">הצהרת נגישות</a>
-      <button type="button" id="cookieSettingsBtn" class="link-btn">הגדרות עוגיות</button>
-    </nav>
-    <p>© 2026 Y.I Trade &amp; Marketing · כל הזכויות שמורות</p>
+    <div class="footer-columns">
+      <section class="footer-column"><h2>קטגוריות</h2><nav id="footerCategories" aria-label="קטגוריות"></nav></section>
+      <section class="footer-column"><h2>מידע משפטי ושירות</h2><nav aria-label="מידע משפטי ושירות"><a href="#/privacy">מדיניות פרטיות</a><a href="#/terms">תנאי שימוש</a><a href="#/returns">ביטול והחזרות</a><a href="#/cookies">מדיניות עוגיות</a><a href="#/accessibility">הצהרת נגישות</a><button type="button" id="cookieSettingsBtn" class="link-btn">הגדרות עוגיות</button></nav></section>
+      <section class="footer-column"><h2>החנות שלך</h2><div id="footerContact" class="footer-contact"></div><a class="footer-about-link" href="#/about">אודותינו</a></section>
+    </div>
+    <p class="footer-copyright">© 2026 החנות שלך · כל הזכויות שמורות</p>
   </footer>
 
   <!-- עגלה כמודל צדדי -->
@@ -95,6 +94,13 @@
         </form>
       </div>
       <div id="adminManagementArea">
+      <section class="admin-shop-info"><h4>פרטי העסק ואודותינו</h4><p>העדכונים נשמרים בענן ומוצגים לכל המבקרים.</p><form id="adminShopInfoForm" class="admin-shop-info-grid">
+        <label>שם העסק<input id="shopInfoLegalName" maxlength="120"></label><label>מספר עוסק / ח.פ.<input id="shopInfoBusinessId" maxlength="40"></label>
+        <label>כתובת<input id="shopInfoAddress" maxlength="200"></label><label>טלפון<input id="shopInfoPhone" maxlength="40"></label>
+        <label>וואטסאפ<input id="shopInfoWhatsapp" maxlength="40"></label><label>אימייל<input id="shopInfoEmail" type="email" maxlength="160"></label>
+        <label>שעות פעילות<input id="shopInfoHours" maxlength="200"></label><label class="about-field">אודותינו<textarea id="shopInfoAbout" maxlength="3000" rows="5"></textarea></label>
+        <fieldset class="about-field"><legend>פרטי רכז/ת נגישות</legend><label>שם<input id="shopInfoAccessName" maxlength="120"></label><label>טלפון<input id="shopInfoAccessPhone" maxlength="40"></label><label>אימייל<input id="shopInfoAccessEmail" type="email" maxlength="160"></label></fieldset>
+        <button type="submit">שמירת פרטי העסק</button></form></section>
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button id="adminLogoutBtn" type="button" style="background:#334155;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer">התנתקות</button></div>
       <form id="adminAddProductForm" style="display:flex; flex-direction:column; gap:12px; background:#0f172a; padding:16px; border-radius:12px;">
         <h4 style="margin:0; color:#38bdf8;">הוספה / עריכת מוצר</h4>
@@ -110,8 +116,6 @@
             <option value="apple">Apple</option>
             <option value="xiaomi">Xiaomi</option>
             <option value="poco">Poco</option>
-            <option value="kosher">כשרים</option>
-            <option value="tablets">טאבלטים</option>
             <option value="earbuds">אוזניות</option>
             <option value="watches">שעונים</option>
             <option value="chargers">מטענים</option>
@@ -121,8 +125,6 @@
             <option value="יבואן רשמי">יבואן רשמי</option>
             <option value="יבואן מקביל">יבואן מקביל</option>
             <option value="כשר">כשר</option>
-            <option value="מחודש">מחודש</option>
-            <option value="מכשיר שהופעל">מכשיר שהופעל</option>
           </select>
           <label class="sr-only" for="adminPMeta">תיאור קצר</label><input type="text" id="adminPMeta" placeholder="תיאור קצר (לדוגמה: יבואן מקביל · e-SIM)" aria-label="תיאור קצר" maxlength="200" style="flex:2; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#fff;" name="adminPMeta">
         </div>
@@ -185,13 +187,32 @@
     </div>
   </div>
 
-  <script src="cloud-config.js?v=mobilefix-2"></script>
+  <script src="supabase.js"></script>
+  <script src="cloud-config.js?v=local-vendor-1"></script>
   <script src="shop-info.js"></script>
   <script src="order-config.js"></script>
   <script src="stock-config.js?v=stock-feed-2"></script>
-  <script src="legal.js?v=2"></script>
+  <script src="legal.js?v=3"></script>
   <script src="consent.js?v=1"></script>
-  <script src="catalog-data.js?v=variants-1"></script>
-  <script src="script.js?v=stock-feed-2"></script>
+  <script src="catalog-data.js?v=series-2"></script>
+  <script src="js/01-categories-theme.js?v=split-1"></script>
+<script src="js/02-products-validation.js?v=split-1"></script>
+<script src="js/03-variants-helpers.js?v=split-1"></script>
+<script src="js/04-admin-core-cloud.js?v=split-1"></script>
+<script src="js/05-admin-variants-editor.js?v=split-1"></script>
+<script src="js/06-admin-product-form.js?v=split-1"></script>
+<script src="js/07-admin-images-backup.js?v=split-1"></script>
+<script src="js/08-svg-images-categories.js?v=split-1"></script>
+<script src="js/09-cart.js?v=split-1"></script>
+<script src="js/10-views-home-cards.js?v=split-1"></script>
+<script src="js/11-stock-category-page.js?v=split-1"></script>
+<script src="js/12-product-page-checkout.js?v=split-1"></script>
+<script src="js/13-shop-info-meta.js?v=split-1"></script>
+<script src="js/14-orders.js?v=split-1"></script>
+<script src="js/15-banners.js?v=split-1"></script>
+<script src="js/16-admin-banners.js?v=split-1"></script>
+<script src="js/17-admin-subcategories.js?v=split-1"></script>
+<script src="js/18-router.js?v=split-1"></script>
+<script src="js/19-filter-drawer-boot.js?v=split-1"></script>
 </body>
 </html>
